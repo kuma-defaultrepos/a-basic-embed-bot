@@ -1,0 +1,32 @@
+{
+  "content": "",
+  "embeds": [
+    {
+      "title": "First Infantry Division",
+      "description": "",
+      "color": "#5865F2",
+      "thumbnail": "",
+      "image": "",
+      "footer": "",
+      "author": {
+        "name": "",
+        "icon_url": ""
+      },
+      "fields": []
+    },
+    {
+      "title": "",
+      "description": "",
+      "color": "#5865F2",
+      "thumbnail": "",
+      "image": "https://cdn.discordapp.com/attachments/1255616227615703141/1255905529226727555/mplargeimage.png?ex=69286c2b&is=69271aab&hm=1c09e794b4cecdd21e4ca745ee0283bd3974ce66bafa584bb8444a5e8f8db8f3&",
+      "footer": "",
+      "author": {
+        "name": "",
+        "icon_url": ""
+      },
+      "fields": []
+    }
+  ],
+  "file_name": "true-export.json"
+}
