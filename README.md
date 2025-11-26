@@ -2,11 +2,6 @@
 
 Bot for interactively configuring and sending embeds via Discord slash commands and a modal form.
 
-**DISCLAIMER:** This is almost entirely AI coded and is **not** supported. This is purely a "for fun" project and shoud not be used productively. Once the bot sends an embed, the embed remains even if the bot is taken offline. While it is online, there is **no** restrictions to who can send embeds. *This may change in the future if it is to be used*
-
-If you actively use this, I'd be glad to hear from you at @calari00 with feedback, suggestions or anything of the sort.
-Not published under a license, modify or use as you wish. <3
-
 ## Setup
 - Install deps: `python -m pip install -r requirements.txt`
 - In the Developer Portal, invite with `applications.commands` (and `bot` if you want guild member presence). Message Content intent is **not** needed.
@@ -35,9 +30,9 @@ Tips:
 ## Optional: Local web UI to build an embed
 - Install Flask: `python -m pip install flask`
 - Run the web UI: `python webapp.py` then open http://127.0.0.1:5000
-- Fill message content and one or more embeds, add fields, click Save. It writes `embed_config.json` next to the script.
-- You can rename the JSON using the file name box; Save/Download/Upload respect that name.
-- In Discord, either run `/embed import [file_name]` (reads the chosen JSON on disk) or `/embed import_file` and attach the downloaded JSON, then `/embed preview` or `/embed send`.
+- Fill message content and one or more embeds, add fields, then **Download JSON**. The browser downloads the file; upload it with `/embed import_file` (or place it next to the bot for `/embed import`).
+- You can set the download name in the file name box; upload respects that name when writing to disk on the bot host.
+- In Discord, either run `/embed import_file` and attach the downloaded JSON, or place the JSON on disk and use `/embed import [file_name]`, then `/embed preview` or `/embed send`.
 
 ## Self-host quickstart
 - Create and activate a venv (recommended).

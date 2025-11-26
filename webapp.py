@@ -70,7 +70,7 @@ HTML = """
 <body>
   <div class="wrap">
     <h1>Discord Embed Creator</h1>
-    <p class="lead">Fill the form, add fields, then click Save. This writes <code>embed_config.json</code> next to this script. Use <code>/embed import</code> in Discord to load it.</p>
+    <p class="lead">Build embeds, download the JSON, then upload it to the bot with <code>/embed import_file</code> (or drop it into your bot host).</p>
 
     <div class="card">
       <label>Message content</label>
@@ -86,9 +86,8 @@ HTML = """
     </div>
 
     <div class="card">
-      <button onclick="save()">Save to embed_config.json</button>
-      <button class="secondary" onclick="downloadConfig()">Download JSON</button>
-      <label style="margin-left:12px;">File name <input type="text" id="fileName" value="embed_config.json" style="margin-left:6px; width:200px;" /></label>
+      <button onclick="downloadCurrent()">Download JSON</button>
+      <label style="margin-left:12px;">File name <input type="text" id="fileName" value="embed_export.json" style="margin-left:6px; width:200px;" /></label>
       <label style="margin-left:12px;">Upload JSON <input type="file" id="upload" accept="application/json" style="margin-left:6px;" /></label>
       <span class="status" id="status"></span>
     </div>
@@ -114,11 +113,7 @@ HTML = """
       };
     }
 
-    let fileName = "embed_config.json";
-    function nextAutoFileName() {
-      const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
-      return `embed_export_${stamp}.json`;
-    }
+    let fileName = "embed_export.json";
     let embeds = [createEmbed()];
 
     function addEmbed() {
@@ -320,26 +315,21 @@ HTML = """
       };
     }
 
-    async function save() {
-      // Generate a fresh file name on each save to avoid overwriting the previous export.
-      fileName = nextAutoFileName();
-      document.getElementById("fileName").value = fileName;
-
-      const payload = getPayload();
+    function downloadCurrent() {
       const status = document.getElementById("status");
-      status.textContent = "Saving...";
-      try {
-        const res = await fetch(`/save?file_name=${encodeURIComponent(fileName)}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save");
-        status.textContent = `Saved to ${fileName}. Use /embed import or /embed import_file in Discord.`;
-      } catch (err) {
-        status.textContent = "Error: " + err.message;
-      }
+      const payload = getPayload();
+      const stamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
+      const name = (fileName && fileName.trim()) ? fileName.trim() : `embed_export_${stamp}.json`;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      status.textContent = `Downloaded ${name}. Use /embed import_file in Discord or copy to your bot host.`;
     }
 
     function renderPreview() {
@@ -443,10 +433,6 @@ HTML = """
       preview.appendChild(shell);
     }
 
-    function downloadConfig() {
-      window.location = `/config?file_name=${encodeURIComponent(fileName)}`;
-    }
-
     document.getElementById("upload").addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -470,7 +456,7 @@ HTML = """
 
     document.getElementById("content").addEventListener("input", renderPreview);
     document.getElementById("fileName").addEventListener("input", (e) => {
-      fileName = e.target.value || "embed_config.json";
+      fileName = e.target.value || "embed_export.json";
     });
     renderEmbeds();
   </script>
@@ -482,28 +468,6 @@ HTML = """
 @APP.route("/", methods=["GET"])
 def index():
     return render_template_string(HTML)
-
-
-@APP.route("/save", methods=["POST"])
-def save():
-    payload = request.get_json(force=True, silent=True) or {}
-    file_name = request.args.get("file_name") or payload.get("file_name") or DEFAULT_FILE
-    path = safe_json_path(file_name)
-    try:
-        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    except OSError as exc:
-        return jsonify({"error": f"Failed to write file: {exc}"}), 500
-    return jsonify({"status": "ok", "path": str(path.resolve())})
-
-
-@APP.route("/config", methods=["GET"])
-def config_download():
-    file_name = request.args.get("file_name") or DEFAULT_FILE
-    path = safe_json_path(file_name)
-    if path.exists():
-        return send_file(path, mimetype="application/json", as_attachment=True, download_name=path.name)
-    empty = {"content": "", "embeds": []}
-    return jsonify(empty)
 
 
 @APP.route("/upload", methods=["POST"])
